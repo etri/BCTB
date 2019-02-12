@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+
+		<!-- 
+		1.annotation-driven : @Controller가 붙은 bean을 자동 생성하며, 주소패턴에 "/"사용을 가능하게 해줍니다.
+	 	2.context:annotation-config : xml파일에서 어노테이션을 사용할 수 있도록 해줍니다.
+	 	3.tx:annotation-driven : @Transactional 명령어 사용 하도록 해줍니다
+		4.context:component-scan : 해당 패키지 이름이 포함되는 클래스 객체를 자동생성합니다
+		* @Controller, @Component, @Service, @Repository
+		5.BeanNameViewResolver : bean id에 해당하는 요청이 오면 해당 클래스의 객체를 생성합니다.
+		6.download bean : 게시판에서 파일 다운로드를 위한 bean
+		7.json bean : BeanName리졸버에 의해서 json이란 요청이 오면 해당 클래스의 객체를 생성 및 실행?합니다.
+		이동할때 request의 Attribute에 이때 Map이나 DTO클래스 객체를 넘겨주면 이를 ajax의 경우 JSON형태로 바꾸어서 리턴합니다. 
+		8.InternalResourceViewResolver : jsp요청으로 변환해 줍니다.
+	 -->
+	 
+	<mvc:annotation-driven/>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	<context:annotation-config/>
+	<context:component-scan base-package="kr.co.bctt.ssh" />
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order='0'></bean>
+	<bean id="json" class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"></bean>
+
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:order='1' p:prefix="/WEB-INF/views/" p:suffix=".jsp"></bean>
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/> 
+	
+	</beans>

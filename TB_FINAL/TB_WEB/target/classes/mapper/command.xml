@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="command">
+	
+	<select id="selectImage" resultType="kr.co.bctt.ssh.dto.ImageInfo">
+		select IT.*, PT.project_name from image_table IT
+		LEFT JOIN project_table PT ON IT.project_id = PT.project_id;
+	</select>
+	
+	<insert id="insertImage" parameterType="kr.co.bctt.ssh.dto.ImageInfo">
+		insert into image_table(name, id, format, os, size, description, project_id, status, visibility, _protected) 
+		values(#{name},#{id},#{format},#{os},#{size},#{description},#{project_id},#{status},#{visibility},#{_protected})
+		ON DUPLICATE KEY UPDATE name=#{name}, format=#{format}, os=#{os}, size=#{size}, description=#{description}, 
+		project_id=#{project_id}, status=#{status}, visibility=#{visibility}, _protected=#{_protected}
+	</insert>
+	
+	<update id="updateImage" parameterType="kr.co.bctt.ssh.dto.ImageInfo">
+		update image_table set name=#{name}, format=#{format}, size=#{size} where id=#{id} 
+	</update>
+
+	<delete id="deleteImage" parameterType="java.lang.String">
+		delete from image_table where id=#{id} 
+	</delete>
+
+
+	<select id="selectFlavor" resultType="kr.co.bctt.ssh.dto.FlavorInfo">
+		select * from flavor_table
+	</select>
+	<insert id="insertFlavor" parameterType="kr.co.bctt.ssh.dto.FlavorInfo">
+		insert into flavor_table values(#{name},#{id},#{vcpus},#{ram},#{root_disk},#{ephemeral_disk},#{swap_disk},#{rxtx_factor},#{is_public},#{disabled})
+		ON DUPLICATE KEY UPDATE name=#{name}, vcpus=#{vcpus}, ram=#{ram}, root_disk=#{root_disk}, ephemeral_disk=#{ephemeral_disk}, 
+		swap_disk=#{swap_disk}, rxtx_factor=#{rxtx_factor}, is_public=#{is_public}, disabled=#{disabled}
+	</insert>
+	 <update id="updateFlavor" parameterType="kr.co.bctt.ssh.dto.FlavorInfo">
+		update flavor_table set name=#{name}, vcpus=#{vcpus}, ram=#{ram}, disk=#{disk} where id=#{id} 
+	</update>
+	
+	<!-- 삭제하기전에 vnfd_table에서 name이 사용중인지 조회하기 위한 sql -->
+	<select id="selectVnfd"  resultType="kr.co.bctt.ssh.dto.Vnfd">
+		select * from vnfd_table
+	</select>
+	
+	<select id="selectFlavorId" parameterType="java.lang.String" resultType="java.lang.String">
+		select id from flavor_table where name=#{name} 
+	</select>
+	
+	<delete id="deleteFlavor" parameterType="java.lang.String">
+		delete from flavor_table where id=#{id} 
+	</delete>
+	
+	<!-- package -->
+	<select id="selectPackageInfo"  resultType="kr.co.bctt.ssh.dto.PackageInfo">
+		select * from package_table
+	</select>
+	
+	<delete id="deletePackageInfo"  parameterType="java.lang.String">
+		delete from package_table where package_name=#{name} 
+	</delete>
+	
+	<insert id="insertPackageInfo" parameterType="kr.co.bctt.ssh.dto.PackageInfo">
+		insert into package_table values(#{package_name},now(),#{pathName},#{desc})
+	</insert>
+	
+	
+	<!-- vnfd -->
+	<insert id="insertVnfd" parameterType="kr.co.bctt.ssh.dto.Vnfd">
+		insert into vnfd_table(vnfd_id,vnfd_name,description) values(#{vnfd_id},#{vnfd_name},#{description})
+	</insert>
+	<insert id="insertAllVnfd" parameterType="kr.co.bctt.ssh.dto.Vnfd">
+		insert into vnfd_table values(#{vnfd_id},#{vnfd_name},#{image_name},#{flavor_name},#{package_name}, #{package_pathname},#{description},#{vnfd},#{image_id})
+	</insert>
+	<update id="updateVnfd" parameterType="kr.co.bctt.ssh.dto.Vnfd">
+		update vnfd_table set vnfd_name=#{vnfd_name}, description=#{description} where vnfd_id=#{vnfd_id}
+	</update>
+	<delete id="deleteVnfd" parameterType="java.lang.String">
+		delete from vnfd_table where vnfd_id=#{vnfd_id}
+	</delete>
+	
+	<!-- vnf -->
+	<select id="selectVnfInfo" resultType="kr.co.bctt.ssh.dto.VnfInfo">
+		select * from vnf_table 
+	</select>
+	<insert id="insertVnfInfo" parameterType="kr.co.bctt.ssh.dto.VnfInfo">
+		insert into vnf_table(vnf_id,vnf_name,vnfd_name,vnfd_id,description,status) values(#{vnf_id},#{vnf_name},#{vnfd_name},#{vnfd_id},#{description},#{status})
+	</insert>
+	<update id="updateVnfInfo" parameterType="java.util.Map">
+		update vnf_table set vnf_name=#{vnf_name},status=#{status} where vnf_id=#{vnf_id}
+	</update>
+	<delete id="deleteVnfInfo" parameterType="java.lang.String">
+		delete from vnf_table where vnf_id=#{vnf_id}
+	</delete>
+	
+	
+	<!-- public network -->
+	<select id="selectNetwork" resultType="kr.co.bctt.ssh.dto.Network">
+		SELECT NT.*, PT.project_name FROM network_table NT
+		LEFT JOIN project_table PT ON NT.project_id = PT.project_id;
+	</select>
+	<insert id="insertNetwork" parameterType="kr.co.bctt.ssh.dto.Network">
+		insert into network_table(network_name, network_id, subnet_id, cidr, gateway_ip, subnet_name, project_id, allocation_pools, dns_nameservers, enable_dhcp, ip_version, external) 
+		values(#{network_name},#{network_id},#{subnet_id},#{cidr},#{gateway_ip},#{subnet_name},#{project_id},#{allocation_pools},#{dns_nameservers},#{enable_dhcp},#{ip_version},#{external})
+		ON DUPLICATE KEY UPDATE network_name=#{network_name}, subnet_id=#{subnet_id}, cidr=#{cidr}, gateway_ip=#{gateway_ip}, subnet_name=#{subnet_name}, 
+		project_id=#{project_id}, allocation_pools=#{allocation_pools}, dns_nameservers=#{dns_nameservers}, enable_dhcp=#{enable_dhcp}, ip_version=#{ip_version}, external=#{external}
+	</insert>
+	<update id="updatePublicNetwork" parameterType="kr.co.bctt.ssh.dto.Network">
+		update network_table 
+		set network_name=#{network_name}, subnet_ipv4_id=#{subnet_ipv4_id}, network_ip=#{network_ip},gateway_ip=#{gateway_ip}
+		where network_id=#{network_id}
+	</update>
+
+	<!-- private network -->
+	<select id="selectPrivateNetwork" resultType="kr.co.bctt.ssh.dto.Network">
+		select * from private_network_table
+	</select>
+	<insert id="insertPrivateNetwork" parameterType="kr.co.bctt.ssh.dto.Network">
+		insert into private_network_table(network_name,network_id,subnet_ipv4_id,network_ip,gateway_ip) 
+		values(#{network_name},#{network_id},#{subnet_ipv4_id},#{network_ip},#{gateway_ip})
+	</insert>
+	<update id="updatePrivateNetwork" parameterType="kr.co.bctt.ssh.dto.Network">
+		update private_network_table 
+		set network_name=#{network_name}, subnet_ipv4_id=#{subnet_ipv4_id}, network_ip=#{network_ip},gateway_ip=#{gateway_ip}
+		where network_id=#{network_id}
+	</update>
+	
+	<!-- route -->
+	<select id="selectRoute" resultType="kr.co.bctt.ssh.dto.Route">
+		SELECT RT.*, PT.project_name FROM router_table RT
+		LEFT JOIN project_table PT ON RT.project_id = PT.project_id;
+	</select>
+	
+	<insert id="insertRoute" parameterType="kr.co.bctt.ssh.dto.Route">
+		insert into router_table(admin_state_up, availability_zone_hints, availability_zones, created_at, description, distributed, external_gateway_info, flavor_id, ha, id, interfaces_info, name, project_id, revision_number, routes, status, tags, updated_at) 
+		values(#{admin_state_up},#{availability_zone_hints},#{availability_zones},#{created_at},#{description},#{distributed},#{external_gateway_info},#{flavor_id},#{ha},#{id},#{interfaces_info},#{name},#{project_id},#{revision_number},#{routes},#{status},#{tags},#{updated_at})
+		ON DUPLICATE KEY UPDATE admin_state_up=#{admin_state_up}, availability_zone_hints=#{availability_zone_hints}, availability_zones=#{availability_zones}, created_at=#{created_at}, 
+		description=#{description}, distributed=#{distributed}, external_gateway_info=#{external_gateway_info}, flavor_id=#{flavor_id}, 
+		ha=#{ha},interfaces_info=#{interfaces_info}, name=#{name},project_id=#{project_id}, 
+		revision_number=#{revision_number}, routes=#{routes}, status=#{status}, tags=#{tags}, updated_at=#{updated_at}
+		
+	</insert>
+	
+	<update id="updateRoute" parameterType="kr.co.bctt.ssh.dto.Route">
+		update router_network_table 
+		set router_name=#{router_name}, ext_ip=#{ext_ip_ip}
+		where router_id=#{router_id}
+	</update>
+	
+
+	<select id="Vnfd" parameterType="java.lang.String" resultType="kr.co.bctt.ssh.dto.Vnfd">
+		SELECT vnfd FROM vnfd_table where vnfd_id=#{vnfd_id};
+	</select>
+	
+	
+	<select id="getFlavor" resultType="kr.co.bctt.ssh.dto.FlavorInfo">
+		SELECT * FROM flavor_table;
+	</select>
+	
+	<select id="getVnfd" resultType="kr.co.bctt.ssh.dto.Vnfd">
+		SELECT image_name, image_id, package_name, flavor_name, vnfd_id, vnfd_name FROM vnfd_table;
+	</select>
+	
+	<select id="getPackage" resultType="kr.co.bctt.ssh.dto.PackageInfo">
+		SELECT package_name, pathname FROM package_table;
+	</select>
+	
+	<select id="getImage" resultType="kr.co.bctt.ssh.dto.ImageInfo">
+		SELECT name, id FROM image_table;
+	</select>
+	
+	<!-- project -->
+	<insert id="insertProject" parameterType="kr.co.bctt.ssh.dto.ProjectInfo">
+		INSERT INTO project_table (project_id, project_name, description, domain_id, enabled) VALUES (#{project_id},#{project_name},#{description},#{domain_id},#{enabled})  
+			ON DUPLICATE KEY UPDATE project_name=#{project_name}, description=#{description}, domain_id=#{domain_id}, enabled=#{enabled}
+	</insert>
+	
+	<insert id="insertInstance" parameterType="kr.co.bctt.ssh.dto.Instance">
+		insert into instance_table values(#{diskConfig},#{availability_zone},#{host},#{hypervisor_hostname},#{instance_name},#{power_state},#{task_state},#{vm_state},#{launched_at},
+		#{terminated_at},#{accessIPv4},#{accessIPv6},#{addresses},#{config_drive},#{created},#{flavor_name},#{flavor_id},#{hostId},#{id},
+		#{image_name},#{image_id},#{key_name},#{name},#{progress},#{project_id},#{properties},#{security_groups},#{status},#{updated},#{user_id},#{volumes_attached})
+		ON DUPLICATE KEY UPDATE diskConfig=#{diskConfig}, availability_zone=#{availability_zone}, host=#{host}, hypervisor_hostname=#{hypervisor_hostname}, instance_name=#{instance_name}, 
+		power_state=#{power_state}, task_state=#{task_state}, vm_state=#{vm_state}, launched_at=#{launched_at}, terminated_at=#{terminated_at}, accessIPv4=#{accessIPv4}, accessIPv6=#{accessIPv6},
+		addresses=#{addresses}, config_drive=#{config_drive}, created=#{created}, flavor_name=#{flavor_name}, flavor_id=#{flavor_id}, hostId=#{hostId},
+		image_name=#{image_name}, image_id=#{image_id}, key_name=#{key_name}, name=#{name}, progress=#{progress}, project_id=#{project_id}, properties=#{properties},
+		security_groups=#{security_groups}, status=#{status}, updated=#{updated}, user_id=#{user_id}, volumes_attached=#{volumes_attached}
+	</insert>
+	
+	<select id="getInstance" resultType="kr.co.bctt.ssh.dto.Instance">
+		SELECT IT.*, PT.project_name project_name FROM instance_table IT
+		LEFT JOIN project_table PT ON IT.project_id = PT.project_id ORDER BY name ASC;
+	</select>
+	
+	<insert id="insertSubnet" parameterType="kr.co.bctt.ssh.dto.Subnet">
+		INSERT INTO subnet_table (allocation_pools, cidr, created_at, description, dns_nameservers, enable_dhcp, gateway_ip, host_routes, id, ip_version, ipv6_address_mode, ipv6_ra_mode, name, network_id, project_id, revision_number, segment_id, service_types, subnetpool_id, tags, updated_at) 
+		VALUES (#{allocation_pools},#{cidr},#{created_at},#{description},#{dns_nameservers},#{enable_dhcp},#{gateway_ip},#{host_routes},#{id},#{ip_version},#{ipv6_address_mode},#{ipv6_ra_mode},
+		#{name},#{network_id},#{project_id},#{revision_number},#{segment_id},#{service_types},#{subnetpool_id},#{tags},#{updated_at})  
+		ON DUPLICATE KEY UPDATE allocation_pools=#{allocation_pools}, cidr=#{cidr}, created_at=#{created_at}, description=#{description}, dns_nameservers=#{dns_nameservers}, enable_dhcp=#{enable_dhcp},
+		gateway_ip=#{gateway_ip}, host_routes=#{host_routes}, ip_version=#{ip_version}, ipv6_address_mode=#{ipv6_address_mode}, ipv6_ra_mode=#{ipv6_ra_mode}, 
+		name=#{name}, network_id=#{network_id}, project_id=#{project_id}, revision_number=#{revision_number}, segment_id=#{segment_id},
+		service_types=#{service_types}, subnetpool_id=#{subnetpool_id}, tags=#{tags}, updated_at=#{updated_at}
+	</insert>
+	
+	<select id="getSubnet" parameterType="java.lang.String" resultType="kr.co.bctt.ssh.dto.Subnet">
+		SELECT ST.*, NT.network_name network_name FROM (
+		select * from subnet_table WHERE id = #{subnet_id}) ST
+		LEFT JOIN network_table NT ON ST.network_id = NT.network_id;
+	</select>
+	
+	<select id="getRouterDetail" parameterType="java.lang.String" resultType="kr.co.bctt.ssh.dto.Route">
+		SELECT RT.*, PT.project_name project_name FROM (
+		select * from router_table WHERE id = #{router_id}) RT
+		LEFT JOIN project_table PT ON RT.project_id = PT.project_id;
+	</select>
+	
+	<select id="getInstanceDetail" parameterType="java.lang.String" resultType="kr.co.bctt.ssh.dto.Instance">
+		SELECT A.*, B.* FROM (
+		SELECT IT.*, FT.vcpus vcpus, FT.ram ram, FT.root_disk root_disk FROM (
+		SELECT IT.*, PT.project_name project_name FROM (
+		select * from instance_table WHERE id = #{instance_id}) IT
+		LEFT JOIN project_table PT ON IT.project_id = PT.project_id) IT
+		LEFT JOIN flavor_table FT ON IT.flavor_id = FT.id) A, (SELECT * FROM vnc_config_table) B;
+	</select>
+	
+	<insert id="insertAllEthereum" parameterType="kr.co.bctt.ssh.dto.Ethereum">
+		insert into ethereum_table(time_stamp, profile_name, description, network_type, node_cnt, client_cnt, num_cpus, mem_size, disk_size, 
+		network_id, network_name, chainid, difficulty, gaslimit, flavor_id, flavor_name, vnfd_id, vnf_id, status) values
+		(NOW(),#{profile_name},#{description},#{network_select},#{node_cnt}, #{client_cnt},
+		 #{num_cpus},#{mem_size},#{disk_size},#{network_name},#{network_name},#{chainid},#{difficulty},#{gaslimit},#{flavor_select},#{flavor_select},#{vnfd_id},#{vnf_id},#{status})
+	</insert>
+
+	<select id="getEthereum" resultType="kr.co.bctt.ssh.dto.Ethereum">
+		SELECT * FROM ethereum_table;
+	</select>
+	
+	<select id="getHost" resultType="kr.co.bctt.ssh.dto.HostInfo">
+		SELECT * FROM host_table WHERE service = 'compute' ORDER BY hostName;
+	</select>
+	
+	<!-- project -->
+	<insert id="insertHost" parameterType="kr.co.bctt.ssh.dto.HostInfo">
+		INSERT INTO host_table (hostName, service, zone) 
+		VALUES (#{hostName},#{service},#{zone})  
+	</insert>
+	
+	<!-- public network -->
+	<select id="selectExtNetwork" resultType="kr.co.bctt.ssh.dto.Network">
+		SELECT * FROM network_table WHERE external = 'Internal';
+	</select>
+	
+	<select id="getHyperledger" resultType="kr.co.bctt.ssh.dto.Hyperledger">
+		SELECT * FROM hyperledger_table;
+	</select>
+	
+</mapper>

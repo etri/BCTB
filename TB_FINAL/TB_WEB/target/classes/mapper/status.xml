@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  
+   <mapper namespace="status">
+  	
+  	<select id="getVcscfInfo" resultType="kr.co.bctt.ssh.dto.VcscfInfo">
+  		select * from vcscf_info
+  	</select>
+  	
+  	<select id="getProjectList" resultType="kr.co.bctt.ssh.dto.ProjectInfo">
+  		select * from project_table
+  	</select>
+	
+  	<select id="getResourceInfo" resultType="kr.co.bctt.ssh.dto.NodeInformation">
+  		select host_name host, total_cpu totalCpu, used_cpu useCpu, total_mem totalMem, used_mem useMem, total_disk totalDisk, used_disk useDisk from resource_table
+  	</select>
+  
+  
+  </mapper>

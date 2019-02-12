@@ -1,0 +1,92 @@
+
+* 오픈스택 명령
+
+------------------------------------------------------------------------------------------
+- controller 만  재부팅 후 확인 및 실행 순서
+
+1. memcached 데몬 확인 (아래 참조)
+
+2. VM을 생성 후 재시작 시 ip 정보가 정상적으로 올라오지 않는 경우 (아래 참조)
+
+3. mistral 실행
+/root/mistral.sh start
+ps -ef | grep mistral
+
+4. barbican 확인
+ps -ef | grep barbican
+
+5. tacker 실행
+ps -ef | grep tacker
+
+   
+
+------------------------------------------------------------------------------------------
+- vnc 접속 url 찾는 명령
+
+openstack server list
+openstack console url show test1
+
+------------------------------------------------------------------------------------------
+- 대시보드가 접속안되는 경우 /var/log/apache2 디렉토리에서 여러 로그 파일로확인
+
+내 경우에는 확인하니까 memcached 데몬이 안살아있어서 다시 살림
+
+netstat -ant | grep 11211
+service memcached start
+
+------------------------------------------------------------------------------------------
+- VM을 생성 후 재시작 시 ip 정보가 정상적으로 올라오지 않는 경우 
+
+  -- controller 노드에서 
+
+service nova-api restart
+
+service neutron-server restart
+service neutron-linuxbridge-agent restart
+service neutron-dhcp-agent restart
+service neutron-metadata-agent restart
+service neutron-l3-agent restart
+
+  -- 해당 compute 노드에서
+
+service nova-compute restart
+service neutron-linuxbridge-agent restart
+
+명령 후 ping 테스트 수행
+
+------------------------------------------------------------------------------------------
+- image 올리는 명령 (image 저장 위치 : /var/lib/glance/images)
+
+openstack image create "ubuntu server 16.04 LTS" --file ubuntu-server-16.04-LTS-cloudimg-amd64.img \
+--disk-format qcow2 --container-format bare --public
+
+openstack image list
+
+------------------------------------------------------------------------------------------
+- flavor 생성
+
+openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+
+
+------------------------------------------------------------------------------------------
+- instance 사이즈 변경
+
+1. openstack server show myInstance
+2. openstack flavor list
+3. openstack server resize --flavor 200 --wait myInstance
+
+https://help.dreamhost.com/hc/en-us/articles/215912748-How-to-change-the-resource-limits-of-a-DreamCompute-instance
+
+
+------------------------------------------------------------------------------------------
+- 오픈스택 한도값 변경 (여기서는 vcpu(20) 및 instance(10)로 되어 있음)
+
+1. nova quota-show
+2. keystone tenant-list
+3. nova quota-update --tenant_id 1cc75c171d764b5584c70be22bf53105 --security_groups 100 
+   --> 3번은 예제이며, default tenant id 정보를 사용
+
+http://clouddoc.stratus.com/1.5.1.0/en-us/Content/Help/P03_Support/C02_InstallGuide/C05_OpenStackInstall/T_OpenStackQuotas.htm
+
+------------------------------------------------------------------------------------------
+
